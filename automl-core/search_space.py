@@ -13,7 +13,6 @@ class SearchSpace:
         self.is_classification = is_classification
         self.max_features = max_features or self.num_features
         
-        # Hyperparameter search spaces for different models
         self.model_spaces = {
             'random_forest': {
                 'n_estimators': [50, 100, 200, 300],
@@ -55,15 +54,12 @@ class SearchSpace:
     
     def sample_random_config(self) -> Dict[str, Any]:
         """Sample a random candidate configuration."""
-        # Random feature selection
         num_selected = np.random.randint(1, min(self.max_features + 1, self.num_features + 1))
         selected_indices = np.random.choice(self.num_features, size=num_selected, replace=False)
         feature_mask = [i in selected_indices for i in range(self.num_features)]
         
-        # Random model selection
         model_name = np.random.choice(self.model_names)
         
-        # Random hyperparameters
         hyperparameters = {}
         for param, values in self.model_spaces[model_name].items():
             hyperparameters[param] = np.random.choice(values)
@@ -102,7 +98,6 @@ class SearchSpace:
         if 'hyperparameters' not in config:
             return False
         
-        # Validate hyperparameters
         model_space = self.model_spaces[config['model']]
         for param, value in config['hyperparameters'].items():
             if param not in model_space:

@@ -72,8 +72,15 @@ export const getJobStatus = async (jobId: string): Promise<JobStatus> => {
 };
 
 export const getJobResults = async (jobId: string): Promise<JobResults> => {
-  const response = await api.get<JobResults>(`/results/${jobId}`);
-  return response.data;
+  try {
+    const response = await api.get<JobResults>(`/results/${jobId}`);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 400 && error.response?.data?.error === 'Job is not completed yet') {
+      throw new Error('Job is still processing. Please wait.');
+    }
+    throw error;
+  }
 };
 
 export default api;
