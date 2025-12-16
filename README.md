@@ -72,5 +72,24 @@ quantum-automl/
 
 ## Development
 
-Each module is independent and communicates via HTTP/JSON. See individual module READMEs for more details.
+Each module is independent and communicates via HTTP/JSON. See individual module READMEs for more details:
+
+- [Frontend README](frontend/README.md)
+- [API Gateway README](api-gateway/README.md)
+- [AutoML Core README](automl-core/README.md)
+- [Quantum Sampler README](quantum-sampler/README.md)
+
+## Quick Start
+
+Use the provided scripts to start/stop all services:
+
+```bash
+# Start all services
+./start.sh
+
+# Stop all services
+./stop.sh
+```
+
+See [sample_datasets/README.md](sample_datasets/README.md) for sample datasets to test the platform.
 
