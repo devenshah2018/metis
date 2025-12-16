@@ -9,23 +9,18 @@ def select_features(X: pd.DataFrame, y: pd.Series, max_features: Optional[int] =
                    feature_mask: Optional[List[bool]] = None) -> Tuple[pd.DataFrame, List[str]]:
     """Select features based on feature mask or mutual information."""
     if feature_mask is not None:
-        # Use provided feature mask
         selected_features = [X.columns[i] for i, selected in enumerate(feature_mask) if selected]
         X_selected = X[selected_features]
     else:
-        # Use all features
         selected_features = list(X.columns)
         X_selected = X.copy()
     
-    # Limit to max_features if specified
     if max_features and len(selected_features) > max_features:
-        # Use mutual information to rank features
         if y.dtype == 'object' or y.dtype.name == 'category':
             mi_scores = mutual_info_classif(X_selected, y, random_state=42)
         else:
             mi_scores = mutual_info_regression(X_selected, y, random_state=42)
         
-        # Get top features
         top_indices = np.argsort(mi_scores)[-max_features:]
         selected_features = [selected_features[i] for i in top_indices]
         X_selected = X_selected[selected_features]

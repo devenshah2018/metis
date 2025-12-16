@@ -22,23 +22,14 @@ def build_cost_function(search_space: Dict[str, Any], current_best_score: float 
         feature_mask = qubits[:num_features]
         num_selected = sum(feature_mask)
         
-        # Penalty for too many features
         if num_selected > max_features:
             return float('inf')
         
-        # Penalty for no features
         if num_selected == 0:
             return float('inf')
         
-        # Encourage diversity: prefer configurations with different feature sets
-        # This is a simplified cost function
-        # In practice, this would consider correlation with previous candidates
-        
-        # Base cost: encourage moderate number of features
         base_cost = abs(num_selected - max_features / 2) / max_features
         
-        # Diversity term: would need history of previous candidates
-        # For now, just return base cost
         return base_cost
     
     return cost_function

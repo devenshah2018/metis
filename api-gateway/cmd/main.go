@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-	// Get AutoML Core URL from environment or use default
 	automlCoreURL := os.Getenv("AUTOML_CORE_URL")
 	if automlCoreURL == "" {
 		automlCoreURL = "http://localhost:8000"

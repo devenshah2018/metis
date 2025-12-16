@@ -23,15 +23,12 @@ def preprocess_dataset(df: pd.DataFrame, target_column: Optional[str] = None) ->
     """Preprocess dataset: handle missing values, encode categorical variables."""
     df = df.copy()
     
-    # Identify target column if not specified
     if target_column is None:
-        # Try common target column names
         for col in ['target', 'label', 'y', 'class']:
             if col in df.columns:
                 target_column = col
                 break
     
-    # Separate features and target
     if target_column and target_column in df.columns:
         y = df[target_column]
         X = df.drop(columns=[target_column])
@@ -39,15 +36,12 @@ def preprocess_dataset(df: pd.DataFrame, target_column: Optional[str] = None) ->
         y = None
         X = df
     
-    # Handle missing values
     X = X.fillna(X.mean(numeric_only=True))
-    X = X.fillna('')  # Fill remaining non-numeric columns with empty string
+    X = X.fillna('')
     
-    # Encode categorical variables
     for col in X.select_dtypes(include=['object']).columns:
         X[col] = pd.Categorical(X[col]).codes
     
-    # Convert all columns to numeric
     X = X.apply(pd.to_numeric, errors='coerce').fillna(0)
     
     return X, y
@@ -57,12 +51,10 @@ def split_data(X: pd.DataFrame, y: pd.Series, test_size: float = 0.2, val_size: 
     """Split data into train, validation, and test sets."""
     from sklearn.model_selection import train_test_split
     
-    # First split: train+val and test
     X_train_val, X_test, y_train_val, y_test = train_test_split(
         X, y, test_size=test_size, random_state=42, stratify=y if y.dtype == 'int' or y.dtype == 'object' else None
     )
     
-    # Second split: train and val
     val_size_adjusted = val_size / (1 - test_size)
     X_train, X_val, y_train, y_val = train_test_split(
         X_train_val, y_train_val, test_size=val_size_adjusted, random_state=42,

@@ -40,7 +40,6 @@ export const useJobPolling = (jobId: string | null, enabled: boolean = true): Us
         const jobStatus = await getJobStatus(jobId);
         setStatus(jobStatus);
 
-        // Stop polling if job is completed or failed
         if (jobStatus.status === 'completed' || jobStatus.status === 'failed') {
           stopPolling();
         }
@@ -54,10 +53,8 @@ export const useJobPolling = (jobId: string | null, enabled: boolean = true): Us
       }
     };
 
-    // Poll immediately
     pollStatus();
 
-    // Then poll every 2 seconds
     intervalRef.current = setInterval(pollStatus, 2000);
 
     return () => {

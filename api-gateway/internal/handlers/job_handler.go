@@ -69,7 +69,6 @@ func (h *JobHandler) SubmitJob(c *gin.Context) {
 		return
 	}
 
-	// Validate config
 	if _, ok := config["metric"]; !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "config.metric is required"})
 		return
@@ -83,14 +82,11 @@ func (h *JobHandler) SubmitJob(c *gin.Context) {
 		return
 	}
 
-	// Create job
 	jobID := uuid.New().String()
 	_ = h.queue.CreateJob(jobID)
 
-	// Encode dataset to base64
 	datasetBase64 := base64.StdEncoding.EncodeToString(datasetBytes)
 
-	// Send to AutoML Core asynchronously
 	go h.processJobAsync(jobID, datasetBase64, datasetFormat, config)
 
 	c.JSON(http.StatusAccepted, SubmitResponse{
@@ -99,10 +95,8 @@ func (h *JobHandler) SubmitJob(c *gin.Context) {
 }
 
 func (h *JobHandler) processJobAsync(jobID string, datasetBase64 string, datasetFormat string, config map[string]interface{}) {
-	// Update status to running
 	h.queue.UpdateJobStatus(jobID, models.StatusRunning, 0, "Processing job...")
 
-	// Send to AutoML Core
 	req := client.ProcessJobRequest{
 		JobID:         jobID,
 		Dataset:       datasetBase64,
@@ -114,8 +108,6 @@ func (h *JobHandler) processJobAsync(jobID string, datasetBase64 string, dataset
 		h.queue.SetJobFailed(jobID, fmt.Sprintf("Failed to process job: %v", err))
 		return
 	}
-
-	// Note: AutoML Core will call back to update status and complete the job
 }
 
 func (h *JobHandler) GetJobStatus(c *gin.Context) {
@@ -172,7 +164,6 @@ func (h *JobHandler) GetJobResults(c *gin.Context) {
 	})
 }
 
-// Callback endpoints for AutoML Core to update job status
 func (h *JobHandler) UpdateStatus(c *gin.Context) {
 	var req struct {
 		JobID    string            `json:"job_id" binding:"required"`

@@ -10,7 +10,7 @@ const api = axios.create({
 });
 
 export interface SubmitJobRequest {
-  dataset: string; // Base64 encoded dataset
+  dataset: string;
   dataset_format: 'csv' | 'json';
   config: AutoMLConfig;
 }

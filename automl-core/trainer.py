@@ -19,7 +19,6 @@ class ModelTrainer:
     
     def train_and_evaluate(self, config: Dict[str, Any], metric: str) -> Tuple[float, BaseEstimator, Dict[str, float]]:
         """Train a model with given configuration and return validation score."""
-        # Select features
         feature_mask = config['feature_mask']
         X_train_selected, selected_features = select_features(
             self.X_train, self.y_train, feature_mask=feature_mask
@@ -28,7 +27,6 @@ class ModelTrainer:
             self.X_val, self.y_val, feature_mask=feature_mask
         )
         
-        # Create and train model
         model = create_model(
             config['model'],
             config['hyperparameters'],
@@ -37,11 +35,9 @@ class ModelTrainer:
         
         model.fit(X_train_selected, self.y_train)
         
-        # Evaluate
         train_score = self._compute_score(model, X_train_selected, self.y_train, metric)
         val_score = self._compute_score(model, X_val_selected, self.y_val, metric)
         
-        # Get feature importance if available
         feature_importance = self._get_feature_importance(model, selected_features)
         
         metrics = {
@@ -84,10 +80,10 @@ class ModelTrainer:
         else:
             if metric == 'r2':
                 return r2_score(y, y_pred)
-            elif metric == 'mse':
-                return -mean_squared_error(y, y_pred)  # Negative for maximization
+            el            if metric == 'mse':
+                return -mean_squared_error(y, y_pred)
             elif metric == 'mae':
-                return -mean_absolute_error(y, y_pred)  # Negative for maximization
+                return -mean_absolute_error(y, y_pred)
             else:
                 return r2_score(y, y_pred)
     
@@ -100,7 +96,6 @@ class ModelTrainer:
             for i, feature in enumerate(feature_names):
                 importance_dict[feature] = float(importances[i])
         elif hasattr(model, 'coef_'):
-            # For linear models, use absolute coefficients
             coef = model.coef_
             if coef.ndim > 1:
                 coef = np.abs(coef[0])
@@ -109,7 +104,6 @@ class ModelTrainer:
             for i, feature in enumerate(feature_names):
                 importance_dict[feature] = float(coef[i])
         else:
-            # Uniform importance if not available
             for feature in feature_names:
                 importance_dict[feature] = 1.0 / len(feature_names)
         

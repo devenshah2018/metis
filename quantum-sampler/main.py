@@ -7,7 +7,6 @@ import logging
 
 from qaoa_sampler import QAOASampler
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -16,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Quantum-AutoML Sampler")
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -40,7 +38,6 @@ class GenerateResponse(BaseModel):
 async def generate_candidates(request: GenerateRequest):
     """Generate candidate configurations using QAOA."""
     try:
-        # Validate request
         if 'num_features' not in request.search_space:
             raise ValueError("search_space.num_features is required")
         if request.num_candidates < 1 or request.num_candidates > 50:

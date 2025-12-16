@@ -13,7 +13,6 @@ from search_space import SearchSpace
 from orchestrator import Orchestrator
 import requests
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -23,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Quantum-AutoML Core")
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -32,14 +30,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Get API Gateway URL from environment
 API_GATEWAY_URL = os.getenv("API_GATEWAY_URL", "http://localhost:8080")
 QUANTUM_SAMPLER_URL = os.getenv("QUANTUM_SAMPLER_URL", "http://localhost:8001")
 
 
 class ProcessJobRequest(BaseModel):
     job_id: str
-    dataset: str  # Base64 encoded
+    dataset: str
     dataset_format: str
     config: Dict[str, Any]
 
@@ -87,7 +84,6 @@ async def process_job(request: ProcessJobRequest):
     logger.info(f"Processing job {job_id}")
     
     try:
-        # Validate request
         if not request.job_id:
             raise ValueError("job_id is required")
         if not request.dataset:
@@ -103,10 +99,8 @@ async def process_job(request: ProcessJobRequest):
         if request.config['objective'] not in ['maximize', 'minimize']:
             raise ValueError("config.objective must be 'maximize' or 'minimize'")
         
-        # Update status: loading dataset
         update_status(job_id, "running", 5, "Loading dataset...")
         
-        # Load and preprocess dataset
         try:
             df = load_dataset(request.dataset, request.dataset_format)
             logger.info(f"Loaded dataset with shape {df.shape}")
@@ -125,12 +119,10 @@ async def process_job(request: ProcessJobRequest):
         if len(X) < 10:
             raise ValueError("Dataset too small: need at least 10 samples")
         
-        # Determine if classification or regression
         is_classification = y.dtype == 'object' or y.dtype.name == 'category' or \
                            (y.dtype in ['int64', 'int32'] and y.nunique() < 20)
         logger.info(f"Task type: {'classification' if is_classification else 'regression'}")
         
-        # Split data
         update_status(job_id, "running", 10, "Splitting data...")
         try:
             X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y)
@@ -138,7 +130,6 @@ async def process_job(request: ProcessJobRequest):
         except Exception as e:
             raise ValueError(f"Failed to split data: {str(e)}")
         
-        # Build search space
         update_status(job_id, "running", 15, "Building search space...")
         max_features = request.config.get('max_features')
         if max_features and max_features > X.shape[1]:
@@ -151,7 +142,6 @@ async def process_job(request: ProcessJobRequest):
             max_features=max_features
         )
         
-        # Create orchestrator
         update_status(job_id, "running", 20, "Starting optimization...")
         orchestrator = Orchestrator(
             X_train, X_val, X_test,
@@ -163,7 +153,6 @@ async def process_job(request: ProcessJobRequest):
             quantum_sampler_url=QUANTUM_SAMPLER_URL if QUANTUM_SAMPLER_URL else None
         )
         
-        # Run optimization
         update_status(job_id, "running", 30, "Running optimization...")
         try:
             results = orchestrator.run()
@@ -173,7 +162,6 @@ async def process_job(request: ProcessJobRequest):
             logger.error(traceback.format_exc())
             raise ValueError(f"Optimization failed: {str(e)}")
         
-        # Complete job
         update_status(job_id, "running", 100, "Job completed successfully")
         complete_job(job_id, results)
         

@@ -9,7 +9,6 @@ def decode_samples(samples: List[List[int]], search_space: Dict[str, Any]) -> Li
     num_features = search_space['num_features']
     model_names = search_space.get('model_names', ['random_forest', 'xgboost', 'svm', 'logistic_regression'])
     
-    # Model hyperparameter spaces (simplified)
     model_spaces = {
         'random_forest': {
             'n_estimators': [50, 100, 200, 300],
@@ -33,19 +32,14 @@ def decode_samples(samples: List[List[int]], search_space: Dict[str, Any]) -> Li
     }
     
     for sample in samples:
-        # Decode feature mask
         feature_mask = [bool(sample[i]) if i < len(sample) else False for i in range(num_features)]
         
-        # Ensure at least one feature is selected
         if not any(feature_mask):
-            # Randomly select at least one feature
             idx = random.randint(0, num_features - 1)
             feature_mask[idx] = True
         
-        # Random model selection
         model = random.choice(model_names)
         
-        # Random hyperparameters
         hyperparameters = {}
         for param, values in model_spaces.get(model, {}).items():
             hyperparameters[param] = random.choice(values)

@@ -15,7 +15,6 @@ class Evaluator:
         """Evaluate a candidate configuration."""
         score, model, metrics = self.trainer.train_and_evaluate(config, self.metric)
         
-        # Adjust score based on objective
         if self.objective == 'minimize':
             score = -score
         
@@ -40,7 +39,6 @@ class Evaluator:
         if not results:
             raise ValueError("No valid configurations evaluated")
         
-        # Find best result
         best_result = max(results, key=lambda x: x['score'])
         
         return best_result

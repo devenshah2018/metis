@@ -27,7 +27,7 @@ func NewAutoMLClient(baseURL string) *AutoMLClient {
 
 type ProcessJobRequest struct {
 	JobID       string                 `json:"job_id"`
-	Dataset     string                 `json:"dataset"` // Base64 encoded
+	Dataset     string                 `json:"dataset"`
 	DatasetFormat string               `json:"dataset_format"`
 	Config      map[string]interface{} `json:"config"`
 }

@@ -48,7 +48,6 @@ function App() {
     }
   };
 
-  // Check if job is completed and fetch results
   useEffect(() => {
     if (status?.status === 'completed' && jobId && !results) {
       getJobResults(jobId)
