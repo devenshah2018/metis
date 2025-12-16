@@ -80,7 +80,7 @@ class ModelTrainer:
         else:
             if metric == 'r2':
                 return r2_score(y, y_pred)
-            el            if metric == 'mse':
+            elif metric == 'mse':
                 return -mean_squared_error(y, y_pred)
             elif metric == 'mae':
                 return -mean_absolute_error(y, y_pred)
