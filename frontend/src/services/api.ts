@@ -30,6 +30,12 @@ export interface JobStatus {
   message?: string;
 }
 
+export interface DataSplitInfo {
+  samples: number;
+  features: number;
+  columns: string[];
+}
+
 export interface JobResults {
   job_id: string;
   status: 'completed';
@@ -49,6 +55,11 @@ export interface JobResults {
     score: number;
     config: Record<string, any>;
   }>;
+  data_splits?: {
+    train: DataSplitInfo;
+    validation: DataSplitInfo;
+    test: DataSplitInfo;
+  };
 }
 
 export const submitJob = async (dataset: File, config: AutoMLConfig): Promise<string> => {

@@ -169,7 +169,7 @@ function App() {
       </div>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 pb-12">
+      <main className={`mx-auto px-6 pb-12 ${state === 'results' ? 'max-w-6xl' : 'max-w-4xl'}`}>
         {error && (
           <div className="mb-6 p-4 bg-[var(--error)]/10 border border-[var(--error)]/30 rounded-lg animate-fade-in">
             <div className="flex items-center gap-3">

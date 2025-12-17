@@ -154,6 +154,23 @@ class Orchestrator:
             },
             'feature_importance': convert_to_json_serializable(feature_importance),
             'training_history': convert_to_json_serializable(self.training_history[:50]),
+            'data_splits': {
+                'train': {
+                    'samples': len(self.X_train),
+                    'features': len(self.X_train.columns),
+                    'columns': list(self.X_train.columns)[:20],
+                },
+                'validation': {
+                    'samples': len(self.X_val),
+                    'features': len(self.X_val.columns),
+                    'columns': list(self.X_val.columns)[:20],
+                },
+                'test': {
+                    'samples': len(self.X_test),
+                    'features': len(self.X_test.columns),
+                    'columns': list(self.X_test.columns)[:20],
+                },
+            },
         }
         
         return result
