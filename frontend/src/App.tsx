@@ -91,7 +91,7 @@ function App() {
                 </svg>
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-[var(--text-primary)] flex items-center gap-2">METIS <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--accent)]/20 text-[var(--accent)] border border-[var(--accent)]/30">DevenAI</span></h1>
+                <h1 className="text-xl font-semibold text-[var(--text-primary)] flex items-center gap-2">METIS <span className="text-xs font-semibold px-3 py-1 rounded-lg bg-gradient-to-r from-[var(--primary)]/20 to-[var(--accent)]/20 text-[var(--accent)] border border-[var(--accent)]/40 shadow-sm">DevenAI</span></h1>
                 <p className="text-xs text-[var(--text-muted)]">Quantum-Enhanced Machine Learning</p>
               </div>
             </div>
@@ -107,6 +107,31 @@ function App() {
                   New Job
                 </button>
               )}
+              <div className="relative group">
+                <button className="text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-[var(--bg-elevated)]">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                  Docs
+                </button>
+                <div className="absolute right-0 top-full mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg p-3 shadow-xl min-w-[280px]">
+                    <div className="flex flex-col gap-2">
+                      <a 
+                        href="https://github.com/devenshah2018/quantum-automl/blob/main/quantum-sampler/quantum_sampler_demo.ipynb" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors p-2 rounded hover:bg-[var(--bg-card)]"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Quantum Sampler Demo
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div className="relative group border-l border-[var(--border)] pl-4">
                 <span className="text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] cursor-pointer transition-colors">
                   Created by Deven Shah
