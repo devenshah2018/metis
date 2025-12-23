@@ -36,6 +36,24 @@ export interface DataSplitInfo {
   columns: string[];
 }
 
+export interface AutoAdjustments {
+  stratified_split?: {
+    attempted?: boolean;
+    reason?: string;
+    fallback?: string;
+    train_val_split?: {
+      attempted?: boolean;
+      reason?: string;
+      fallback?: string;
+    };
+  };
+  max_features?: {
+    original?: number;
+    adjusted?: number;
+    reason?: string;
+  };
+}
+
 export interface JobResults {
   job_id: string;
   status: 'completed';
@@ -60,6 +78,7 @@ export interface JobResults {
     validation: DataSplitInfo;
     test: DataSplitInfo;
   };
+  auto_adjustments?: AutoAdjustments;
 }
 
 export const submitJob = async (dataset: File, config: AutoMLConfig): Promise<string> => {

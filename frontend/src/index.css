@@ -110,6 +110,15 @@ select {
   transition: all 0.2s ease;
 }
 
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239CA3AF'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.25rem;
+  padding-right: 2.5rem;
+  appearance: none;
+}
+
 input[type="number"]:focus,
 input[type="text"]:focus,
 select:focus {
@@ -199,4 +208,29 @@ input[type="text"]::placeholder {
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: min(20rem, calc(100vw - 2rem)) !important;
+  width: auto;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Scrollbar for table container */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: var(--bg-elevated);
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }

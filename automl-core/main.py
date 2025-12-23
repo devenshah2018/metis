@@ -124,17 +124,27 @@ async def process_job(request: ProcessJobRequest):
         logger.info(f"Task type: {'classification' if is_classification else 'regression'}")
         
         update_status(job_id, "running", 10, "Splitting data...")
+        auto_adjustments = {}
         try:
-            X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y)
+            X_train, X_val, X_test, y_train, y_val, y_test, split_adjustments = split_data(X, y)
             logger.info(f"Data split: train={len(X_train)}, val={len(X_val)}, test={len(X_test)}")
+            if split_adjustments:
+                auto_adjustments.update(split_adjustments)
+                logger.info(f"Auto-adjustments made during data splitting: {split_adjustments}")
         except Exception as e:
             raise ValueError(f"Failed to split data: {str(e)}")
         
         update_status(job_id, "running", 15, "Building search space...")
         max_features = request.config.get('max_features')
         if max_features and max_features > X.shape[1]:
+            original_max_features = max_features
             max_features = X.shape[1]
-            logger.warning(f"max_features adjusted to {max_features}")
+            auto_adjustments['max_features'] = {
+                'original': original_max_features,
+                'adjusted': max_features,
+                'reason': f'Dataset has only {X.shape[1]} features'
+            }
+            logger.warning(f"max_features adjusted from {original_max_features} to {max_features}")
         
         search_space = SearchSpace(
             list(X.columns),
@@ -163,6 +173,12 @@ async def process_job(request: ProcessJobRequest):
             raise ValueError(f"Optimization failed: {str(e)}")
         
         update_status(job_id, "running", 100, "Job completed successfully")
+        
+        # Add auto-adjustments to results if any were made
+        if auto_adjustments:
+            results['auto_adjustments'] = auto_adjustments
+            logger.info(f"Job {job_id} completed with auto-adjustments: {auto_adjustments}")
+        
         complete_job(job_id, results)
         
         return {"status": "completed", "job_id": job_id}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { DatasetUploadForm } from './components/DatasetUploadForm';
 import { AutoMLConfigForm } from './components/AutoMLConfigForm';
 import { ResultsDashboard } from './components/ResultsDashboard';
+import { DatasetPreview } from './components/DatasetPreview';
 import { useJobPolling } from './hooks/useJobPolling';
 import { submitJob, getJobResults, AutoMLConfig, JobResults } from './services/api';
 
@@ -10,17 +11,31 @@ type AppState = 'upload' | 'config' | 'processing' | 'results';
 function App() {
   const [state, setState] = useState<AppState>('upload');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedCsvData, setSelectedCsvData] = useState<string | undefined>(undefined);
   const [jobId, setJobId] = useState<string | null>(null);
   const [results, setResults] = useState<JobResults | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { status, isLoading: isPolling } = useJobPolling(jobId, state === 'processing');
+  const { status } = useJobPolling(jobId, state === 'processing');
 
-  const handleFileSelect = (file: File) => {
+  const handleFileSelect = (file: File | null) => {
     setSelectedFile(file);
-    setState('config');
+    if (!file) {
+      setSelectedCsvData(undefined);
+    }
     setError(null);
+    // Don't automatically move to config - let user see preview first
+  };
+
+  const handleSampleSelect = (_filename: string, csvData: string) => {
+    setSelectedCsvData(csvData);
+  };
+
+  const handleContinueToConfig = () => {
+    if (selectedFile) {
+      setState('config');
+    }
   };
 
   const handleConfigSubmit = async (config: AutoMLConfig) => {
@@ -64,6 +79,7 @@ function App() {
   const handleReset = () => {
     setState('upload');
     setSelectedFile(null);
+    setSelectedCsvData(undefined);
     setJobId(null);
     setResults(null);
     setError(null);
@@ -208,11 +224,56 @@ function App() {
 
         {state === 'upload' && (
           <div className="card p-8 animate-fade-in">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-2">Upload Your Dataset</h2>
-              <p className="text-[var(--text-secondary)]">Start by uploading a CSV or JSON file containing your data</p>
-            </div>
-            <DatasetUploadForm onFileSelect={handleFileSelect} selectedFile={selectedFile} />
+            {!selectedFile ? (
+              <>
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-2">Upload Your Dataset</h2>
+                  <p className="text-[var(--text-secondary)]">Start by uploading a CSV or JSON file or select from our sample datasets</p>
+                </div>
+                <DatasetUploadForm 
+                  onFileSelect={handleFileSelect} 
+                  selectedFile={selectedFile}
+                  onSampleSelect={handleSampleSelect}
+                  showForm={true}
+                />
+              </>
+            ) : (
+              <>
+                <DatasetPreview 
+                  file={selectedFile} 
+                  csvData={selectedCsvData}
+                  onSelectDifferent={() => {
+                    handleFileSelect(null);
+                    const input = document.getElementById('dataset-upload') as HTMLInputElement;
+                    if (input) input.value = '';
+                  }}
+                />
+                <div className="mt-6 flex justify-end gap-3">
+                  <button
+                    onClick={() => {
+                      handleFileSelect(null);
+                      const input = document.getElementById('dataset-upload') as HTMLInputElement;
+                      if (input) input.value = '';
+                    }}
+                    className="px-6 py-3 rounded-lg flex items-center gap-2 text-sm font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Select Different Dataset
+                  </button>
+                  <button
+                    onClick={handleContinueToConfig}
+                    className="btn-primary px-6 py-3 rounded-lg flex items-center gap-2 text-sm font-medium shadow-lg shadow-[var(--primary)]/20"
+                  >
+                    Continue to Configuration
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -224,7 +285,12 @@ function App() {
                 Set your optimization parameters for <span className="text-[var(--accent)] font-medium">{selectedFile?.name}</span>
               </p>
             </div>
-            <AutoMLConfigForm onSubmit={handleConfigSubmit} isSubmitting={isSubmitting} />
+            <AutoMLConfigForm 
+              onSubmit={handleConfigSubmit} 
+              isSubmitting={isSubmitting}
+              selectedFile={selectedFile}
+              csvData={selectedCsvData}
+            />
           </div>
         )}
 
@@ -273,7 +339,7 @@ function App() {
 
         {state === 'results' && results && (
           <div className="animate-fade-in">
-            <ResultsDashboard results={results} />
+            <ResultsDashboard results={results} datasetFilename={selectedFile?.name} />
           </div>
         )}
       </main>
