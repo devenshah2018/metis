@@ -1,0 +1,2 @@
+"""Quantum-enhanced optimization components."""
+
