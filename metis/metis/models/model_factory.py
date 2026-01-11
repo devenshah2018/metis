@@ -1,62 +1,49 @@
+"""
+Model factory imported from automl-core.
+
+This module imports from automl-core/models/model_factory.py to maintain a single
+source of truth. The automl-core directory is added to sys.path to enable the import.
+METIS's registry is used instead of automl-core's registry for custom model support.
+"""
+import sys
+from pathlib import Path
 from typing import Dict, Any
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.svm import SVC, SVR
-from sklearn.linear_model import LogisticRegression, Ridge
-import xgboost as xgb
+import importlib.util
 
+# Add parent directories to path to import from automl-core
+_metis_dir = Path(__file__).parent.parent.parent
+_repo_root = _metis_dir.parent
+_automl_core = _repo_root / "automl-core"
+
+if str(_automl_core) not in sys.path:
+    sys.path.insert(0, str(_automl_core))
+
+# Import METIS registry to use instead of automl-core's registry
 from metis.exceptions import MetisTrainingError
-from metis.models.registry import get_registry
+from metis.models.registry import get_registry as get_metis_registry
 
+# Temporarily patch automl-core's registry module to use METIS registry
+# This allows automl-core's model_factory to work with METIS's registry
+import types
+_metis_registry_module = types.ModuleType('models.registry')
+_metis_registry_module.get_registry = get_metis_registry
+sys.modules['models.registry'] = _metis_registry_module
 
+# Now import from automl-core (it will use METIS registry via the patch)
+from models.model_factory import create_model as _automl_create_model
+
+# Wrap to convert ValueError to MetisTrainingError
 def create_model(model_name: str, hyperparameters: Dict[str, Any], is_classification: bool):
     """Create a model instance based on name and hyperparameters.
     
-    Args:
-        model_name: Name of the model to create
-        hyperparameters: Dictionary of hyperparameters
-        is_classification: Whether this is a classification task
-    
-    Returns:
-        Trained sklearn-compatible model
-    
-    Raises:
-        MetisTrainingError: If model creation fails
+    This wraps automl-core's model_factory.create_model to use METIS exceptions.
+    The function uses METIS's registry for custom model support.
     """
     try:
-        registry = get_registry()
-        custom_model = registry.get(model_name)
-        
-        if custom_model:
-            return custom_model['creator'](hyperparameters, is_classification)
-        
-        if model_name == 'random_forest':
-            if is_classification:
-                return RandomForestClassifier(**hyperparameters, random_state=42)
-            else:
-                return RandomForestRegressor(**hyperparameters, random_state=42)
-        
-        elif model_name == 'xgboost':
-            if is_classification:
-                return xgb.XGBClassifier(**hyperparameters, random_state=42)
-            else:
-                return xgb.XGBRegressor(**hyperparameters, random_state=42)
-        
-        elif model_name == 'svm':
-            if is_classification:
-                return SVC(**hyperparameters, random_state=42)
-            else:
-                return SVR(**hyperparameters, random_state=42)
-        
-        elif model_name == 'logistic_regression':
-            if is_classification:
-                return LogisticRegression(**hyperparameters, random_state=42)
-            else:
-                return Ridge(**hyperparameters, random_state=42)
-        
-        else:
-            raise MetisTrainingError(f"Unknown model: {model_name}")
+        return _automl_create_model(model_name, hyperparameters, is_classification)
+    except ValueError as e:
+        raise MetisTrainingError(str(e)) from e
     except Exception as e:
-        if isinstance(e, MetisTrainingError):
-            raise
         raise MetisTrainingError(f"Failed to create model {model_name}: {str(e)}") from e
 
+__all__ = ['create_model']

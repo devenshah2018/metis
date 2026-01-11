@@ -22,8 +22,8 @@ model = metis.fit(
     config={
         "metric": "accuracy",
         "objective": "maximize",
-        "search_budget": 5,  # Small for quick testing
-        "use_quantum": False,  # Disable quantum for faster testing
+        "search_budget": 10,  # Small for quick testing
+        "use_quantum": True,  # Disable quantum for faster testing
     }
 )
 
