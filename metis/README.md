@@ -26,23 +26,36 @@ pip install metis-automl
 
 ```python
 import metis
-import pandas as pd
+from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 
-# Option 1: From file path
-model = metis.fit("data.csv", metric="accuracy", search_budget=50)
+# Test custom model registration
+def create_gbm(hyperparameters, is_classification):
+    if is_classification:
+        return GradientBoostingClassifier(**hyperparameters, random_state=42)
+    else:
+        return GradientBoostingRegressor(**hyperparameters, random_state=42)
 
-# Option 2: From DataFrame
-df = pd.read_csv("data.csv")
-model = metis.fit(df, metric="f1", search_budget=100)
+metis.add(
+    'gradient_boosting',
+    create_gbm,
+    {'n_estimators': [50, 100], 'learning_rate': [0.1, 0.3]}
+)
 
-# Make predictions
-predictions = model.predict(X_test)
+print("Registered models:", metis.list_models())
 
-# Get probabilities (classification only)
-probabilities = model.predict_proba(X_test)
-
-# Score on test data
-score = model.score(X_test, y_test)
+# Test with a small search budget for quick testing
+model = metis.fit(
+    dataset="iris.csv",
+    config={
+        "metric": "accuracy",
+        "objective": "maximize",
+        "search_budget": 100,
+        "use_quantum": True,
+    }
+)
+print("Best model:", model.metadata['model_name'])
+print("Hyperparameters:", model.hyperparameters)
+print("Score:", model.metrics['validation_score'])
 ```
 
 ### Configuration Options

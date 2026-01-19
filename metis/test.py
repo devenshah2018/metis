@@ -22,11 +22,10 @@ model = metis.fit(
     config={
         "metric": "accuracy",
         "objective": "maximize",
-        "search_budget": 10,  # Small for quick testing
-        "use_quantum": True,  # Disable quantum for faster testing
+        "search_budget": 100,
+        "use_quantum": True,
     }
 )
-
 print("Best model:", model.metadata['model_name'])
 print("Hyperparameters:", model.hyperparameters)
 print("Score:", model.metrics['validation_score'])
